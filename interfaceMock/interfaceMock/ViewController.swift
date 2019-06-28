@@ -9,7 +9,7 @@
 import UIKit
 import SceneKit
 import ARKit
-import ApiAi
+
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
@@ -20,23 +20,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewDidLoad() {
 
         super.viewDidLoad()
-        // Set the view's delegate
         sceneView.delegate = self
-        
-        // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
-        
         // Create a new scene
         let scene = SCNScene(named: "art.scnassets/newBox.scn")!
-        
-        // Set the scene to the view
         sceneView.scene = scene
         
-        let configuration = AIDefaultConfiguration()
-        configuration.clientAccessToken = "ecc76e9e-3558-4898-bae2-fe0992538211-273dd5df"
-        
-        let apiai = ApiAI.shared()
-        apiai?.configuration = configuration
         
     }
     
