@@ -6,6 +6,7 @@ target 'interfaceMock' do
   use_frameworks!
 
   # Pods for interfaceMock
+	pod 'ApiAI'
 
   target 'interfaceMockTests' do
     inherit! :search_paths
