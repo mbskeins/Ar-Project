@@ -1,0 +1,6 @@
+framework module Pods_ArMonsterTests {
+  umbrella header "Pods-ArMonsterTests-umbrella.h"
+
+  export *
+  module * { export * }
+}

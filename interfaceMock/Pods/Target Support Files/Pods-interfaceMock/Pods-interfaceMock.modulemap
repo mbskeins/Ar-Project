@@ -1,6 +1,0 @@
-framework module Pods_interfaceMock {
-  umbrella header "Pods-interfaceMock-umbrella.h"
-
-  export *
-  module * { export * }
-}

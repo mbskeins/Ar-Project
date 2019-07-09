@@ -1,0 +1,6 @@
+framework module Pods_ArMonsterUITests {
+  umbrella header "Pods-ArMonsterUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
