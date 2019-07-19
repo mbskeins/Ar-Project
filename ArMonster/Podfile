@@ -12,6 +12,7 @@ target 'ArMonster' do
     pod 'SnapKit', '~> 4.0.0'
     #Promise
     pod 'PromiseKit', '~> 4.4'
+    pod 'SVProgressHUD'
   target 'ArMonsterTests' do
     inherit! :search_paths
     # Pods for testing
