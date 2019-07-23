@@ -1,5 +1,8 @@
 PODS:
   - Alamofire (4.8.2)
+  - ChameleonFramework (2.1.0):
+    - ChameleonFramework/Default (= 2.1.0)
+  - ChameleonFramework/Default (2.1.0)
   - PromiseKit (4.5.2):
     - PromiseKit/Foundation (= 4.5.2)
     - PromiseKit/QuartzCore (= 4.5.2)
@@ -16,6 +19,7 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 4.5)
+  - ChameleonFramework
   - PromiseKit (~> 4.4)
   - SnapKit (~> 4.0.0)
   - SVProgressHUD
@@ -23,16 +27,18 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - Alamofire
+    - ChameleonFramework
     - PromiseKit
     - SnapKit
     - SVProgressHUD
 
 SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
+  ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
   PromiseKit: 743e497a5f505a470d3bbbf4ce0663c1268af0a4
   SnapKit: 0de968a9fec17499afa29683b05d0c775b6d1c29
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
 
-PODFILE CHECKSUM: 41fdc2f254e519d4659f53f7b4e65ff1fd9841c7
+PODFILE CHECKSUM: bc70f035004d62a3c0513dc7bc50ecd63e26169b
 
 COCOAPODS: 1.7.2

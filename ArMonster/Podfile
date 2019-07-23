@@ -13,6 +13,7 @@ target 'ArMonster' do
     #Promise
     pod 'PromiseKit', '~> 4.4'
     pod 'SVProgressHUD'
+    pod 'ChameleonFramework'
   target 'ArMonsterTests' do
     inherit! :search_paths
     # Pods for testing

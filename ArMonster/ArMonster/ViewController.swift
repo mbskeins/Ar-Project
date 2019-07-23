@@ -12,6 +12,32 @@ import ARKit
 import PromiseKit
 import AVFoundation
 import SVProgressHUD
+import ChameleonFramework
+
+class policyHolder {
+    var name : String
+    var policyNumber : String
+    var annualPremium : String
+    
+    init(){
+        name = ""
+        policyNumber = ""
+        annualPremium = ""
+    }
+    
+    init(name : String, policy : String, premium : String){
+        self.name = name
+        self.policyNumber = policy
+        self.annualPremium = premium
+    }
+    
+    func printAllValues(){
+        print(name)
+        print(policyNumber)
+        print(annualPremium)
+    }
+    
+}
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
@@ -27,14 +53,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet weak var speechLabel: UILabel!
     @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet weak var messageText: UITextField!
+    let synth = AVSpeechSynthesizer()
+    var imageConfiguration: ARImageTrackingConfiguration?
+
+    var recognizedImageContent = [ String : policyHolder ]()
+
     
     @IBOutlet weak var sendButton: UIButton!
     var modelPlaced = false
     var center : CGPoint!
     let arrow = SCNScene(named: "art.scnassets/arrow.scn")!.rootNode
-    let idleScene = SCNScene(named: "art.scnassets/fightFixed.dae")!
+    let idleScene = SCNScene(named: "art.scnassets/talkingFixed.dae")!
     var positions = [SCNVector3]()
     
+    @IBAction func clearPressed(_ sender: Any) {
+        idleScene.rootNode.enumerateChildNodes { (node, stop) in
+            if node.name == "removeWindow" {
+                node.removeFromParentNode()
+            }
+        }
+    }
     @IBAction func sendPressed(_ sender: Any) {
        SVProgressHUD.show()
         idleScene.rootNode.enumerateChildNodes { (node, stop) in
@@ -43,7 +81,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
         }
         newRequest(messageText.text!)
- 
     }
 
     var animations = [String: CAAnimation]()
@@ -69,8 +106,83 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let lastTenPositions = positions.suffix(10)
         
         arrow.position = getAveragePosition(from: lastTenPositions)
+        
+       // let anchorPosition = Idl.transforms.columns.3
+        //let cameraPosition = sceneView.session.currentFrame
+        // here’s a line connecting the two points, which might be useful for other things
+       // let cameraToAnchor = cameraPosition - anchorPosition
+        // and here’s just the scalar distance
+        //let distance = length(cameraToAnchor)
 
     }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        guard let imageAnchor = anchor as? ARImageAnchor else { return }
+        let image = imageAnchor.referenceImage
+        print(image.name)
+        if let imageName = image.name {
+            say(what: recognizedImageContent[imageName]!.name)
+            let panelNode = createPolicyWindow(imageName: imageName)
+            panelNode.name = "removeWindow"
+            idleScene.rootNode.addChildNode(panelNode)
+            say(what: "Hello \(recognizedImageContent[imageName]!.name) it looks like your premium is: \(recognizedImageContent[imageName]!.annualPremium)")
+        }
+        
+    }
+    
+    func createPolicyWindow(imageName : String) -> SCNNode {
+        
+        let policyHolder = recognizedImageContent[imageName]
+        var windowPane = SCNBox(width: 150, height: 150, length: 3, chamferRadius: 50)
+    
+        windowPane.firstMaterial?.diffuse.contents = UIColor.red
+        var windowNode = SCNNode(geometry: windowPane)
+        
+        
+        windowNode.geometry?.firstMaterial?.diffuse.contents = UIColor.flatRed()
+        let policyHolderName = SCNText(string: "Policy Holder: \(policyHolder!.name)", extrusionDepth: 1)
+        let policyHolderTextNode = SCNNode(geometry: policyHolderName)
+        policyHolderName.font = UIFont(name: "Helvetica", size: 10.0)
+        policyHolderTextNode.position.z = 3
+        policyHolderTextNode.position.x = -60
+        policyHolderTextNode.position.y = 30
+        
+        let policyNo = SCNText(string: "Policy Number: \(policyHolder!.policyNumber)", extrusionDepth: 1)
+        let policyNoTextNode = SCNNode(geometry: policyNo)
+        policyNo.font = UIFont(name: "Helvetica", size: 10.0)
+        policyNoTextNode.position.z = 3
+        policyNoTextNode.position.x = -60
+        policyNoTextNode.position.y = 0
+        
+        
+        let annualPrem = SCNText(string: "Annual Premium: \(policyHolder!.annualPremium)", extrusionDepth: 1)
+        let annualPremNode = SCNNode(geometry: annualPrem)
+        annualPrem.font = UIFont(name: "Helvetica", size: 10.0)
+        annualPremNode.position.z = 3
+        annualPremNode.position.x = -60
+        annualPremNode.position.y = -30
+        
+        policyHolderName.firstMaterial?.diffuse.contents = UIColor.flatWhite()
+        policyNo.firstMaterial?.diffuse.contents = UIColor.flatWhite()
+        annualPrem.firstMaterial?.diffuse.contents = UIColor.flatWhite()
+        
+        windowNode.addChildNode(policyHolderTextNode)
+        windowNode.addChildNode(policyNoTextNode)
+        windowNode.addChildNode(annualPremNode  )
+        windowNode.position.x += 120
+        windowNode.position.y += idleScene.rootNode.position.y + 50
+        
+        return windowNode
+    
+    }
+    
+    func say(what description: String){
+        synth.stopSpeaking(at: .immediate)
+        let content = AVSpeechUtterance(string: description)
+        synth.speak(content)
+    }
+    
+    
     
     func getAveragePosition(from positions : ArraySlice<SCNVector3>) -> SCNVector3 {
         
@@ -89,9 +201,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     override func viewDidLoad() {
-        idleScene.rootNode.scale = SCNVector3(0.004, 0.004, 0.004)
-        sendButton.layer.cornerRadius = 7
+        //recognizedImageContent
+        let nickPappasPolicy = policyHolder(name: "Nick Pappas", policy: "123456789", premium: "$984")
+        let mattSkeinsPolicy = policyHolder(name: "Matt Skeins", policy: "65943827", premium: "$661")
+        let brandyTroxellPolicy = policyHolder(name: "Brandy Troxell", policy: "2187023", premium: "$749")
 
+        
+        recognizedImageContent["license"] = nickPappasPolicy
+        recognizedImageContent["license2"] = mattSkeinsPolicy
+        recognizedImageContent["license3"] = brandyTroxellPolicy
+
+        
+        idleScene.rootNode.scale = SCNVector3(0.006, 0.006, 0.006)
+        sendButton.layer.cornerRadius = 7
+        
+        
+        let directionalLight = SCNLight()
+        directionalLight.type = .directional
+
+        idleScene.rootNode.light = directionalLight
+        
         super.viewDidLoad()
         sceneView.delegate = self
         center = view.center
@@ -151,7 +280,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        
         if modelPlaced == false {
             guard let angle = sceneView.session.currentFrame?.camera.eulerAngles.y else { return }
             idleScene.rootNode.position = arrow.position
@@ -193,6 +321,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        configuration.detectionImages = ARReferenceImage.referenceImages(inGroupNamed: "AR Images", bundle: nil)
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -206,8 +335,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
     }
     
-    
-    
+
     @objc func keyboardWillShow(notification: NSNotification) {
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             let keyboardHeight = keyboardSize.height
@@ -225,12 +353,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func speakText(say messageResponse : String){
         let textGeometry = SCNText(string: messageResponse, extrusionDepth: 1)
-        textGeometry.firstMaterial?.diffuse.contents = UIColor.blue
+        textGeometry.firstMaterial?.diffuse.contents = UIColor.flatRed()
         let textNode = SCNNode(geometry: textGeometry)
         textNode.scale = SCNVector3(0.75, 1, 0.75)
         var modelPos = idleScene.rootNode.position
         modelPos.y += 175
-        modelPos.x -= 75
+        modelPos.x -= 125
         textNode.position = modelPos
         textNode.name = "remove"
         idleScene.rootNode.addChildNode(textNode)
@@ -238,7 +366,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let voice = AVSpeechSynthesisVoice(identifier: AVSpeechSynthesisVoiceIdentifierAlex)
         let myUtterance = AVSpeechUtterance(string: messageResponse)
         print(myUtterance)
-        let synth = AVSpeechSynthesizer()
+
         myUtterance.voice = voice
         //  need to make assignment from distance to 3d object
         myUtterance.volume = 100
@@ -325,6 +453,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
+
+    
     // MARK : Setup initial state of view
     func setInitalState() {
         //
@@ -334,3 +464,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     
 }
+
+
+

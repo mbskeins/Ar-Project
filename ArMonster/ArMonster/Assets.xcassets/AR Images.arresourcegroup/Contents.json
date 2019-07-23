@@ -1,0 +1,17 @@
+{
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  },
+  "resources" : [
+    {
+      "filename" : "license.arreferenceimage"
+    },
+    {
+      "filename" : "license2.arreferenceimage"
+    },
+    {
+      "filename" : "license3.arreferenceimage"
+    }
+  ]
+}
